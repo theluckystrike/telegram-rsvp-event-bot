@@ -4,6 +4,8 @@ import { Store, EventRow, RsvpRow } from "./db.ts";
 import { Bucket, applyRsvp, canCreateEvent, decodeChatId, dueReminders, encodeChatId, fmtWhen, isSourcePayload, nameList, parseEventWhen, parseTz } from "./logic.ts";
 import { APP_HTML, buildShareText, validateInitData } from "./webapp.ts";
 import { resolveLang, t } from "./i18n.ts";
+import { GuestReply, queryText, wireGuest, wireInline } from "./guest.ts";
+import { buildGuestReply } from "./guestReply.ts";
 export { Store };
 
 const BOT = "EventRSVPProBot";
@@ -129,6 +131,19 @@ async function onCancel(ctx: Context, env: Env): Promise<void> {
   }
 }
 
+/** Static copy for a guest chat, with the Markdown the i18n table carries stripped: guest
+ * results are posted as plain text (the query is user-supplied and may contain _ or *). */
+const plain = (s: string): string => s.replaceAll("*", "").replaceAll("`", "");
+
+/** Guest Mode: someone @-mentioned us in a chat we were never added to. The actual
+ * reply-building logic is pure (see guestReply.ts); this just gathers ctx/env inputs. */
+async function onGuest(ctx: Context, env: Env): Promise<GuestReply> {
+  const from = ctx.from;
+  const lang = resolveLang(from?.language_code);
+  const q = queryText(ctx, BOT);
+  return buildGuestReply(BOT, q, lang, plain(startText(lang)), now());
+}
+
 async function remind(env: Env): Promise<number> {
   const bot = new Bot(env.BOT_TOKEN);
   const pending = await store(env).pendingEvents(now());
@@ -214,6 +229,29 @@ function buildBot(env: Env): Bot {
   m.on("message:text", async (ctx) => {
     if (!isPrivate(ctx)) return;
     await ctx.reply(helpText(resolveLang(ctx.from?.language_code)), { parse_mode: "Markdown" });
+  });
+  wireGuest(bot, {
+    botUsername: BOT,
+    reply: (ctx) => onGuest(ctx, env),
+    // `guest` is NOT written to `sources` here (REVIEW-GUEST F3): a summoner is not an
+    // installer. src_guest is earned later, through the ?start=guest deep link in the
+    // buttons below. recordGuest self-limits; `flood` downgrades us to the cheap pitch.
+    record: async (uid, chatType, chatId) => {
+      const r = await store(env).recordGuest(uid, chatType, chatId);
+      if (r.recorded) await store(env).track(uid, "guest");
+      return !r.flood;
+    },
+  });
+  // Classic inline mode: the SAME reply builder, answered as an inline result. A user types
+  // "@Bot query" in any chat on any client and posts the card with `via @Bot` attribution —
+  // no admin, no membership, no Guest Chat Mode toggle. The destination chat is unknown, so
+  // the card carries private-style buttons only. Counted under `inline_queries`; `sources` is
+  // never written here (an inline user is not an installer, same rule as the guest path).
+  wireInline(bot, {
+    botUsername: BOT,
+    reply: (ctx) => onGuest(ctx, env),
+    record: async (uid) => !(await store(env).recordInline(uid)).flood,
+    chosen: (uid) => store(env).recordInlineChosen(uid),
   });
   return bot;
 }

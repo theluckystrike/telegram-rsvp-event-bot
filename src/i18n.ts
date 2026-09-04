@@ -23,6 +23,7 @@ export type Key =
   | "proRunInGroup"
   | "proDescription"
   | "thankYou"
+  | "guestParsed"
   | "btn_unlockProStars"
   | "btn_addToGroup"
   | "btn_shareBot";
@@ -158,6 +159,19 @@ const TABLE: Record<Key, Record<Lang, string>> = {
     fa: "✅ Pro برای گروه فعال شد. رویدادهای نامحدود + یادآوری‌ها.\n\n/more — ابزارهای رایگان بیشتر",
     ar: "✅ تم تفعيل Pro للمجموعة. فعاليات غير محدودة + تذكيرات.\n\n/more — أدوات مجانية أخرى",
     hi: "✅ ग्रुप के लिए Pro अनलॉक हुआ। असीमित इवेंट + रिमाइंडर।\n\n/more — और मुफ़्त टूल्स",
+  },
+  guestParsed: {
+    en: "I can create this event: {when} — add me to this group to collect RSVPs.",
+    ru: "Я могу создать это событие: {when} — добавьте меня в эту группу, чтобы собирать ответы.",
+    es: "Puedo crear este evento: {when} — agrégame a este grupo para recopilar RSVP.",
+    pt: "Posso criar este evento: {when} — adicione-me a este grupo para coletar RSVPs.",
+    id: "Aku bisa membuat acara ini: {when} — tambahkan aku ke grup ini untuk mengumpulkan RSVP.",
+    de: "Ich kann dieses Event erstellen: {when} — füge mich dieser Gruppe hinzu, um RSVPs zu sammeln.",
+    tr: "Bu etkinliği oluşturabilirim: {when} — RSVP toplamak için beni bu gruba ekle.",
+    uk: "Я можу створити цю подію: {when} — додайте мене до цієї групи, щоб збирати відповіді.",
+    fa: "می‌توانم این رویداد را بسازم: {when} — مرا به این گروه اضافه کنید تا پاسخ‌ها را جمع کنم.",
+    ar: "يمكنني إنشاء هذه الفعالية: {when} — أضفني إلى هذه المجموعة لجمع الردود.",
+    hi: "मैं यह इवेंट बना सकता हूं: {when} — RSVP जुटाने के लिए मुझे इस ग्रुप में जोड़ें।",
   },
   btn_unlockProStars: {
     en: "Unlock Pro, {stars} ⭐",
