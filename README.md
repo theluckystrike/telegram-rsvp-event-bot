@@ -1,6 +1,6 @@
 # EventRSVPProBot — RSVP event bot for Telegram
 
-**Try it:** [@EventRSVPProBot](https://t.me/EventRSVPProBot) · [tg.zovo.one/bots/rsvp/](https://tg.zovo.one/bots/rsvp/)
+**Try it:** [@EventRSVPProBot](https://t.me/EventRSVPProBot?start=github) · [tg.zovo.one/bots/rsvp/](https://tg.zovo.one/bots/rsvp/)
 
 ## What it does
 
