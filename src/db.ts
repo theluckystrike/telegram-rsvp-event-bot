@@ -80,7 +80,7 @@ export class Store extends BaseStore {
   }
   private sourceStats(): Record<string, number> {
     const rows = this.all<{ src: string; n: number }>(
-      "SELECT src, COUNT(*) AS n FROM sources WHERE NOT (user_id BETWEEN 900000000 AND 900999999) GROUP BY src");
+      `SELECT src, COUNT(*) AS n FROM sources WHERE ${this.notTestUser("user_id")} GROUP BY src`);
     const out: Record<string, number> = {};
     for (const r of rows) out["src_" + r.src] = r.n;
     return out;
@@ -90,7 +90,7 @@ export class Store extends BaseStore {
     const g = this.one<{ n: number; p: number | null }>("SELECT COUNT(*) AS n, SUM(pro) AS p FROM groups WHERE chat_id != ?1", QA_CHAT);
     const e = this.one<{ n: number }>("SELECT COUNT(*) AS n FROM events WHERE chat_id != ?1", QA_CHAT);
     const r = this.one<{ n: number }>(
-      `SELECT COUNT(*) AS n FROM rsvps WHERE event_id IN (SELECT id FROM events WHERE chat_id != ?1) AND NOT (user_id BETWEEN 900000000 AND 900999999)`, QA_CHAT);
+      `SELECT COUNT(*) AS n FROM rsvps WHERE event_id IN (SELECT id FROM events WHERE chat_id != ?1) AND ${this.notTestUser("user_id")}`, QA_CHAT);
     const rem = this.one<{ n: number }>("SELECT COUNT(*) AS n FROM events WHERE reminded = 1 AND chat_id != ?1", QA_CHAT);
     const qg = this.one<{ n: number }>("SELECT COUNT(*) AS n FROM groups WHERE pro = 1 AND chat_id = ?1", QA_CHAT);
     const u = this.userStats();
